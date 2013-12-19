@@ -1,4 +1,5 @@
 
+from decimal import Decimal
 import pprint
 import inspect
 import urllib2
@@ -16,29 +17,19 @@ class Fetcher(object):
 	def parse(self, content):
 		"""	it receives the fetched content, parses it and returns a Scrap."""
 		raise NotImplemented('This method must be inherited.')
-
-class MetaScraps(type):
-	def __new__(mcls, name, bases, classdict):
-		attrs = {}
-		new_classdict = {}
-		for n, v in classdict.iteritems():
-			if isinstance(v, Attribute):
-				attrs[n] = v
-			else:
-				new_classdict[n] = v
-		cls = type.__new__(mcls, name, bases, new_classdict)
-		cls.attrs = cls.attrs.copy()
-		cls.attrs.update(attrs)
-		return cls
 		
 class Scrap(object):
 	"""	Scrap class represents a bunch of data collected from information
 		sources.
 	"""
-	__metaclass__ = MetaScraps
+	def __new__(cls, *args, **kwargs):
+		obj = super(Scrap, cls).__new__(cls)
+		obj.attrs = {}
+		return obj
+	
 	def __init__(self, **kwargs):
-		prop_names = [prop_name for prop_name, prop_type in inspect.getmembers(self)
-			if not prop_name.startswith('__')]
+		prop_names = [member[0] for member in inspect.getmembers(self)
+			if not member[0].startswith('__')]
 		if 'error_is_none' not in prop_names:
 			self.error_is_none = False
 		for prop_name, prop_value in kwargs.items():
@@ -49,21 +40,26 @@ class Scrap(object):
 			except Exception, e:
 				if not self.error_is_none:
 					raise e
-	
+					
 	def __repr__(self):
-		prop_names = [prop_name for prop_name, prop_type in inspect.getmembers(self)
-			if not prop_name.startswith('__')]
+		unlikely = lambda x: not x.startswith('__') and x is not 'attrs'
+		prop_names = [member[0] for member in inspect.getmembers(self) if unlikely(member[0])]
 		d = {}
-		for prop_name in prop_names:
-			d[prop_name] = getattr(self, prop_name)
+		for propname in prop_names:
+			d[propname] = getattr(self, propname)
 		return pprint.pformat(d)
+	
+	__str__ = __repr__
 
 class Attribute(object):
 	"""	Attribute class is a descriptor which represents each chunk of
 		data extracted from a source of information.
 	"""
+	index = 0
 	def __init__(self, repeat=False, transform=lambda x: x):
-		self.value = None
+		Attribute.index += 1
+		self.index = Attribute.index
+		# self.value = None
 		self.repeat = repeat
 		self.transform = transform
 	
@@ -72,19 +68,22 @@ class Attribute(object):
 		value = self.transform(value)
 		if self.repeat:
 			try:
-				self.value.append(value)
+				obj.attrs[self.index].append(value)
 			except:
-				self.value = [value]
+				obj.attrs[self.index] = [value]
 		else:
-			self.value = value
+			obj.attrs[self.index] = value
 	
-	def __get__(self, obj, typo):
+	def __get__(self, obj, typo=None):
 		"""gets attribute's value"""
-		return self.value
+		try:
+			return obj.attrs[self.index]
+		except KeyError:
+			return None
 		
 	def __delete__(self, obj):
 		"""resets attribute's initial state"""
-		self.value = None
+		obj.attrs[self.index] = None
 
 class FloatAttr(Attribute):
 	"""	FloatAttr class is an Attribute descriptor which tries to convert to 

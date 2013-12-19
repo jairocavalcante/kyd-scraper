@@ -38,18 +38,15 @@ class AnbimaNTNBFetcher(scraps.Fetcher):
 			ipca_final=ipca_final)
 		for sib in tables[2].tr.next_sibling.next_sibling.next_sibling.next_sibling.next_siblings:
 			row = [str(elm.string) for elm in sib.contents if str(elm.string).strip() is not '']
-			print(row)
 			tit = TituloNtnbScrap(codigo_selic=row[0], data_base=row[1],
 				data_vencimento=row[2], taxa_max=row[3], taxa_min=row[4],
 				taxa_ind=row[5], pu=row[6])
-			# print(scraps.titulos)
-			print(tit)
 			scraps.titulos = tit
 		return scraps
 
 fetcher = AnbimaNTNBFetcher()
 ret = fetcher.fetch()
-# print ret
+print ret
 
 # cj = cookielib.LWPCookieJar()
 # proc = urllib2.HTTPCookieProcessor(cj)
