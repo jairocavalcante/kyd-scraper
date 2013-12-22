@@ -35,7 +35,7 @@ class TestScrap(unittest.TestCase):
 		"""it should instanciate a Scrap passing an invalid parameter."""
 		class MyScrap(scraps.Scrap):
 			float_attr = scraps.FloatAttr()
-			error_is_none = True
+			_error_is_none = True
 		myScrap = MyScrap(float_attr='--')
 		self.assertEquals(myScrap.float_attr, None)
 		# ---
@@ -151,38 +151,59 @@ class TestDatetimeAttr(TestAttribute):
 	def test_DatetimeAttr(self):
 		"""	it should instanciate the DatetimeAttr class and set it with a 
 			valid string."""
-		from datetime import datetime
-		a = scraps.DatetimeAttr(formatstr='%Y-%m-%d')
-		a.__set__(self.obj, '2013-01-01')
-		self.assertEquals(a.__get__(self.obj), datetime(2013,1,1))
+		a = scraps.DatetimeAttr(formatstr='%Y-%m-%d %H:%M:%S')
+		a.__set__(self.obj, '2013-01-01 15:22:54')
+		self.assertEquals(a.__get__(self.obj), '2013-01-01T15:22:54')
 		
 	def test_DatetimeAttr_locale(self):
 		"""	it should instanciate the DatetimeAttr class and set it with a 
 			valid string and locale."""
-		from datetime import datetime
 		a = scraps.DatetimeAttr(formatstr='%d/%b/%Y', locale='pt_BR')
 		a.__set__(self.obj, '11/Dez/2013')
-		self.assertEquals(a.__get__(self.obj), datetime(2013,12,11))
+		self.assertEquals(a.__get__(self.obj), '2013-12-11T00:00:00')
 		# Check if locale have been restored
 		a = scraps.DatetimeAttr(formatstr='%d/%b/%Y')
 		a.__set__(self.obj, '11/Dec/2013')
-		self.assertEquals(a.__get__(self.obj), datetime(2013,12,11))
-		
+		self.assertEquals(a.__get__(self.obj), '2013-12-11T00:00:00')
+
+class TestDateAttr(TestAttribute):
+	def test_DateAttr(self):
+		'it should instanciate the DateAttr class and set it with a valid string.'
+		a = scraps.DateAttr(formatstr='%Y-%m-%d')
+		a.__set__(self.obj, '2013-01-01')
+		self.assertEquals(a.__get__(self.obj), '2013-01-01')
+	
+	
 class TestFetcher(unittest.TestCase):
 	def test_Fetcher(self):
 		"""	it should create a Fetcher."""
 		class MyFetcher(scraps.Fetcher):
 			name = 'test'
 			url = 'http://httpbin.org/html'
-			def parse(self, content):
+			def parse(self, response):
 				from bs4 import BeautifulSoup
-				soup = BeautifulSoup(content)
+				soup = BeautifulSoup(response.text)
 				class MockScrap(object):
 					title = soup.html.body.h1.string
 				return MockScrap()
 		fetcher = MyFetcher()
 		ret = fetcher.fetch()
 		self.assertEquals(ret.title, 'Herman Melville - Moby-Dick')
+		
+	def test_Fetcher2(self):
+		"""	it should create a Fetcher and use a parameterized url."""
+		class MyFetcher(scraps.Fetcher):
+			name = 'test'
+			url = 'http://httpbin.org/get?name={name}'
+			def parse(self, response):
+				import json
+				ret = json.loads(response.text)
+				class MockScrap(object):
+					name = ret['args']['name']
+				return MockScrap()
+		fetcher = MyFetcher()
+		ret = fetcher.fetch(name='freitas')
+		self.assertEquals(ret.name, 'freitas')
 
 if __name__ == '__main__':
 	unittest.main(verbosity=1)

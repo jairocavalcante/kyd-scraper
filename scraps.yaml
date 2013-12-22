@@ -1,0 +1,11 @@
+- fetcher:  kyd.fetchers.anbima.TitPubTextFetcher
+  name:     anbima-tit-pub-text
+  parameters:
+      date:   today()
+
+- fetcher:  AnbimaTitPubFetcher
+  name:     anbima-ltn-tit-pub-text
+  parameters:
+      date:     today(format=%d/%b/%Y)
+      contrato: ltn
+

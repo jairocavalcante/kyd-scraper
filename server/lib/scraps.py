@@ -5,14 +5,27 @@ import inspect
 import urllib2
 from datetime import datetime
 
+__all__ = ['Fetcher', 'Scrap', 'Attribute', 'FloatAttr', 'DateAttr',
+	'DatetimeAttr']
+
+class AnyObject(object):
+	pass
+
 class Fetcher(object):
 	"""	Fetcher class represents the request handler. It defines the URL to be
 		requested so as the method to parse.
 	"""
-	def fetch(self):
+	def fetch(self, *args, **kwargs):
 		opener = urllib2.build_opener()
-		req = urllib2.Request(self.url)
-		return self.parse(opener.open(req))
+		req = urllib2.Request(self.url.format(*args, **kwargs))
+		res = opener.open(req)
+		response = AnyObject()
+		response.text = res.read()
+		response.code = res.getcode()
+		response.date = res.info().getheader('date')
+		response.content_type = res.info().getheader('content-type')
+		response.content_length = res.info().getheader('content-length')
+		return self.parse(response)
 	
 	def parse(self, content):
 		"""	it receives the fetched content, parses it and returns a Scrap."""
@@ -30,19 +43,20 @@ class Scrap(object):
 	def __init__(self, **kwargs):
 		prop_names = [member[0] for member in inspect.getmembers(self)
 			if not member[0].startswith('__')]
-		if 'error_is_none' not in prop_names:
-			self.error_is_none = False
+		if '_error_is_none' not in prop_names:
+			self._error_is_none = False
 		for prop_name, prop_value in kwargs.items():
 			if prop_name not in prop_names:
 				raise KeyError('Invalid attribute: ' + prop_name)
 			try:
 				setattr(self, prop_name, prop_value)
 			except Exception, e:
-				if not self.error_is_none:
+				if not self._error_is_none:
 					raise e
 					
 	def __repr__(self):
-		unlikely = lambda x: not x.startswith('__') and x is not 'attrs'
+		unlikely = lambda x: not x.startswith('__') \
+			and x not in ('attrs', '_error_is_none')
 		prop_names = [member[0] for member in inspect.getmembers(self) if unlikely(member[0])]
 		d = {}
 		for propname in prop_names:
@@ -63,8 +77,12 @@ class Attribute(object):
 		self.repeat = repeat
 		self.transform = transform
 	
+	def parse(self, value):
+		return value
+	
 	def __set__(self, obj, value):
 		"""sets attribute's value"""
+		value = self.parse(value)
 		value = self.transform(value)
 		if self.repeat:
 			try:
@@ -96,7 +114,7 @@ class FloatAttr(Attribute):
 		self.percentage = percentage
 		self.thousandsep = thousandsep
 	
-	def __set__(self, obj, value):
+	def parse(self, value):
 		if type(value) in (str, unicode):
 			if self.thousandsep is not None:
 				value = value.replace(self.thousandsep, '')
@@ -108,25 +126,45 @@ class FloatAttr(Attribute):
 			value = float(value)/100
 		else:
 			value = float(value)
-		super(FloatAttr, self).__set__(obj, value)
-	
-class DatetimeAttr(Attribute):
-	"""	DatetimeAttr class is an Attribute descriptor which tries to convert to
-		datetime.datetime every value set.
+		return value
+
+class BaseDatetimeAttr(Attribute):
+	"""	BaseDatetimeAttr class is an Attribute descriptor which parses a string
+		using a datetime format string and stores an iso-formated datetime 
+		string.
 	"""
 	def __init__(self, formatstr=None, locale=None, **kwargs):
-		super(DatetimeAttr, self).__init__(**kwargs)
+		super(BaseDatetimeAttr, self).__init__(**kwargs)
 		self.formatstr = formatstr
 		self.locale = locale
 		
-	def __set__(self, obj, value):
+	def parse(self, value):
 		if self.locale is not None:
 			import locale
 			locale.setlocale(locale.LC_TIME, 'pt_BR')
 		value = datetime.strptime(value, self.formatstr)
 		if self.locale is not None:
 			locale.setlocale(locale.LC_TIME, '')
-		super(DatetimeAttr, self).__set__(obj, value)
+		return value
+		
+	
+class DatetimeAttr(BaseDatetimeAttr):
+	"""	DatetimeAttr class is an Attribute descriptor which parses a string 
+		using a datetime format string and stores an iso-formated datetime 
+		string.
+	"""
+	def parse(self, value):
+		value = super(DatetimeAttr, self).parse(value)
+		return value.isoformat()
+		
+class DateAttr(BaseDatetimeAttr):
+	"""	DateAttr class is an Attribute descriptor which parses a string 
+		using a datetime format string and stores an iso-formated datetime 
+		string.
+	"""
+	def parse(self, value):
+		value = super(DateAttr, self).parse(value)
+		return value.date().isoformat()
 		
 		
 		
