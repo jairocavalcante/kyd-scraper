@@ -139,11 +139,11 @@ class BaseDatetimeAttr(Attribute):
 		self.locale = locale
 		
 	def parse(self, value):
-		if self.locale is not None:
+		if self.locale:
 			import locale
 			locale.setlocale(locale.LC_TIME, 'pt_BR')
 		value = datetime.strptime(value, self.formatstr)
-		if self.locale is not None:
+		if self.locale:
 			locale.setlocale(locale.LC_TIME, '')
 		return value
 		

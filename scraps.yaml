@@ -1,13 +1,19 @@
-- fetcher:  kyd.fetchers.anbima.InflacaoTitPubFetcher
-  name:     anbima-inflacao-igpm
-  parameters:
-      date:     16dez2013
-      contrato: ntn-c
-
-- fetcher:  kyd.fetchers.anbima.InflacaoTitPubFetcher
-  name:     anbima-inflacao-ipca
-  parameters:
-      date:     16dez2013
-      contrato: ntn-b
-
-
+# - 
+#     fetcher:  kyd.fetchers.anbima.InflacaoTitPubFetcher
+#     name:     anbima-inflacao-igpm
+#     parameters:
+#         date:     16dez2013
+#         contrato: ntn-c
+# 
+# -
+#     fetcher:  kyd.fetchers.anbima.InflacaoTitPubFetcher
+#     name:     anbima-inflacao-ipca
+#     parameters:
+#         date:     16dez2013
+#         contrato: ntn-b
+# 
+-
+    fetcher:  kyd.fetchers.anbima.TitPubTextFetcher
+    name:     anbima-tit-pub-text
+    parameters:
+        date: { today : %y }

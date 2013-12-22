@@ -1,4 +1,5 @@
 
+import json
 from kyd.fetchers.anbima import *
 # from kyd.scraps.anbima import *
 
