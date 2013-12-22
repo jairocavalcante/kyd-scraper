@@ -4,24 +4,14 @@ from bs4 import BeautifulSoup as bs
 from kyd.scraps.anbima import *
 import scraps
 
-class IGPMFetcher(scraps.Fetcher):
-	url = 'http://www.anbima.com.br/merc_sec/resultados/msec_{date}_ntn-c.asp'
+class InflacaoTitPubFetcher(scraps.Fetcher):
+	url = 'http://www.anbima.com.br/merc_sec/resultados/msec_{date}_{contrato}.asp'
 	def parse(self, content):
 		soup = bs(content.text)
 		tables = soup.html.body.table.tr.td.div.find_all('table')
 		data_atual = tables[2].tr.td.next_sibling.next_sibling.string
-		ipca_final = tables[7].tr.td.contents[0].string.split(':')[1].replace('%', '')
-		scrap = IGPMScrap(data_atual=data_atual, ipca_final=ipca_final)
-		return scrap
-
-class IPCAFetcher(scraps.Fetcher):
-	url = 'http://www.anbima.com.br/merc_sec/resultados/msec_{date}_ntn-b.asp'
-	def parse(self, content):
-		soup = bs(content.text)
-		tables = soup.html.body.table.tr.td.div.find_all('table')
-		data_atual = tables[2].tr.td.next_sibling.next_sibling.string
-		ipca_final = tables[7].tr.td.contents[0].string.split(':')[1].replace('%', '')
-		scrap = IPCAScrap(data_atual=data_atual, ipca_final=ipca_final)
+		taxa = tables[7].tr.td.contents[0].string.split(':')[1].replace('%', '')
+		scrap = InflacaoTitPubScrap(data_atual=data_atual, taxa=taxa)
 		return scrap
 
 class TitPubFetcher(scraps.Fetcher):
@@ -31,7 +21,7 @@ class TitPubFetcher(scraps.Fetcher):
 		tables = soup.html.body.table.tr.td.div.find_all('table')
 		data_atual = tables[2].tr.td.next_sibling.next_sibling.string
 		nome = tables[2].tr.next_sibling.next_sibling.td.next_sibling.next_sibling.string
-		scraps = AnbimaTitPubScrap(data_atual=data_atual, nome=nome)
+		scraps = TitPubsScrap(data_atual=data_atual, nome=nome)
 		for sib in tables[2].tr.next_sibling.next_sibling.next_sibling.next_sibling.next_siblings:
 			row = [str(elm.string) for elm in sib.contents if str(elm.string).strip() is not '']
 			tit = TitPubScrap(codigo_selic=row[0], data_base=row[1],
@@ -46,7 +36,7 @@ class TitPubTextFetcher(scraps.Fetcher):
 		from itertools import dropwhile, ifilter
 		from StringIO import StringIO
 		text = StringIO(content.text)
-		scraps = AnbimaTitPubTextScrap()
+		scraps = TitPubsTextScrap()
 		_drop_first_3 = dropwhile(lambda x: x[0] < 3, enumerate(text))
 		_drop_empy = ifilter(lambda x: x[1].strip() is not '', _drop_first_3)
 		for c, line in _drop_empy:

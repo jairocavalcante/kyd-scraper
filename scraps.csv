@@ -1,0 +1,12 @@
+fetcher,name,parameters.date,parameters.contrato
+kyd.fetchers.anbima.InflacaoTitPubFetcher,anbima-inflacao-igpm,16dez2013,ntn-c
+kyd.fetchers.anbima.InflacaoTitPubFetcher,anbima-inflacao-ipca,16dez2013,ntn-b
+kyd.fetchers.anbima.TitPubFetcher,anbima-tit-pub-ltn,16dez2013,ltn
+kyd.fetchers.anbima.TitPubFetcher,anbima-tit-pub-lft,16dez2013,lft
+kyd.fetchers.anbima.TitPubFetcher,anbima-tit-pub-ntn-f,16dez2013,ntn-f
+kyd.fetchers.anbima.TitPubFetcher,anbima-tit-pub-ntn-c,16dez2013,ntn-c
+kyd.fetchers.anbima.TitPubFetcher,anbima-tit-pub-ntn-b,16dez2013,ntn-b
+kyd.fetchers.anbima.TitPubTextFetcher,anbima-tit-pub-text,131216,
+
+
+

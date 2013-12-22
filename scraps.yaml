@@ -1,11 +1,13 @@
-- fetcher:  kyd.fetchers.anbima.TitPubTextFetcher
-  name:     anbima-tit-pub-text
+- fetcher:  kyd.fetchers.anbima.InflacaoTitPubFetcher
+  name:     anbima-inflacao-igpm
   parameters:
-      date:   today()
+      date:     16dez2013
+      contrato: ntn-c
 
-- fetcher:  AnbimaTitPubFetcher
-  name:     anbima-ltn-tit-pub-text
+- fetcher:  kyd.fetchers.anbima.InflacaoTitPubFetcher
+  name:     anbima-inflacao-ipca
   parameters:
-      date:     today(format=%d/%b/%Y)
-      contrato: ltn
+      date:     16dez2013
+      contrato: ntn-b
+
 

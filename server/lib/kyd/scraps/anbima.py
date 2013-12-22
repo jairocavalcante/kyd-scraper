@@ -1,8 +1,15 @@
 
 import scraps
 
+class InflacaoTitPubScrap(scraps.Scrap):
+	"""This represents inflation scraps which appears in Anbima's govt bonds
+		page."""
+	data_atual = scraps.DateAttr(formatstr='%d/%b/%Y', locale='pt_BR')
+	taxa = scraps.FloatAttr(decimalsep=',')
+
 class TitPubTextScrap(scraps.Scrap):
-	"""This represents scraps of information from Anbima's Govt Bonds text file."""
+	"""This represents scraps of information from Anbima's govt bonds text
+		file."""
 	_error_is_none = True
 	codigo_selic = scraps.Attribute()
 	titulo = scraps.Attribute()
@@ -16,11 +23,12 @@ class TitPubTextScrap(scraps.Scrap):
 	desvio_padrao = scraps.FloatAttr(decimalsep=',')
 	
 class TitPubsTextScrap(scraps.Scrap):
-	"""This represents scraps of information from Anbima's Public Bonds page."""
+	"""This represents scraps of information from Anbima's govt bonds text
+		file."""
 	titulos = scraps.Attribute(repeat=True)
 
 class TitPubScrap(scraps.Scrap):
-	"""This represents scrapss of information from Anbima's NTN-B page"""
+	"""This scrap represents each contract from Anbima's govt bonds page."""
 	_error_is_none = True
 	codigo_selic = scraps.Attribute()
 	data_base = scraps.DateAttr(formatstr='%d/%m/%Y')
@@ -30,16 +38,10 @@ class TitPubScrap(scraps.Scrap):
 	taxa_ind = scraps.FloatAttr(decimalsep=',')
 	pu = scraps.FloatAttr(thousandsep='.', decimalsep=',')
 	
-class AnbimaTitPubScrap(scraps.Scrap):
-	"""This represents scrapss of information from Anbima's NTN-B page"""
+class TitPubsScrap(scraps.Scrap):
+	"""This represents scraps of information from Anbima's govt bonds page."""
 	data_atual = scraps.DateAttr(formatstr='%d/%b/%Y', locale='pt_BR')
 	nome = scraps.Attribute(transform=lambda x: x.split()[0])
 	titulos = scraps.Attribute(repeat=True)
 
-class AnbimaNtnbScrap(scraps.Scrap):
-	"""This represents scrapss of information from Anbima's NTN-B page"""
-	data_atual = scraps.DateAttr(formatstr='%d/%b/%Y', locale='pt_BR')
-	ipca_final = scraps.FloatAttr(decimalsep=',')
-	nome = scraps.Attribute(transform=lambda x: x.split()[0])
-	titulos = scraps.Attribute(repeat=True)
-	
+
