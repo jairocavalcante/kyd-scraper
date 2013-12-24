@@ -5,7 +5,6 @@ import types
 import yaml
 import json
 from datetime import datetime
-from kyd.fetchers.anbima import *
 
 session_date = '2013-12-13'
 
@@ -35,13 +34,13 @@ def format_session_date(fmt, locale=None):
     return dt
 
 fetchers = [
-    {
-        'fetcher'       : 'kyd.fetchers.anbima.TitPubTextFetcher',
-        'name'          : 'anbima-tit-pub-text',
-        'parameters'    : {
-            'date' : format_session_date('%y%m%d')
-        }
-    },
+    # {
+    #     'fetcher'       : 'kyd.fetchers.anbima.TitPubTextFetcher',
+    #     'name'          : 'anbima-tit-pub-text',
+    #     'parameters'    : {
+    #         'date' : format_session_date('%y%m%d')
+    #     }
+    # },
     {
         'fetcher'       : 'kyd.fetchers.anbima.IGPMTitPubFetcher',
         'name'          : 'anbima-inflacao-ipca',
@@ -59,11 +58,13 @@ fetchers = [
 ]
 
 for fetcher_config in fetchers:
+    # fetcher name: app.fetchers.mod.KlassFetcher
     fetcher_name = fetcher_config['fetcher']
     fetcher_klass = import_func(fetcher_config['fetcher'])
     fetcher = fetcher_klass()
     parms = fetcher_config['parameters']
     scrap = fetcher.fetch(**parms)
+    # action name: app.action.mod.KlassAction
     action_name = fetcher_name.replace('Fetcher', 'Action').replace('fetchers', 'action')
     action_klass = import_func(action_name)
     action = action_klass()
